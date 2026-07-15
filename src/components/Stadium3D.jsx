@@ -48,20 +48,26 @@ export default function Stadium3D({
   const viewModeRef = useRef(viewMode);
   const pathfinderRouteRef = useRef(pathfinderRoute);
 
+  const onSectionSelectRef = useRef(onSectionSelect);
+  const onGateSelectRef = useRef(onGateSelect);
+
   // Synchronize state values to refs for the rendering thread
   useEffect(() => {
     selectedSectionRef.current = selectedSection;
     selectedGateRef.current = selectedGate;
     viewModeRef.current = viewMode;
     pathfinderRouteRef.current = pathfinderRoute;
-  }, [selectedSection, selectedGate, viewMode, pathfinderRoute]);
+    onSectionSelectRef.current = onSectionSelect;
+    onGateSelectRef.current = onGateSelect;
+  }, [selectedSection, selectedGate, viewMode, pathfinderRoute, onSectionSelect, onGateSelect]);
 
   // --- 1. INITIALIZE THREE.JS ONCE ON MOUNT ---
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const width = containerRef.current.clientWidth;
-    const height = containerRef.current.clientHeight || 500;
+    const width = container.clientWidth;
+    const height = container.clientHeight || 500;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x050814);
@@ -76,7 +82,7 @@ export default function Stadium3D({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    containerRef.current.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
     const currentCanvas = renderer.domElement;
@@ -305,9 +311,9 @@ export default function Stadium3D({
       if (hitData) {
         playBeep(600, 0.05);
         if (hitData.type === 'stand') {
-          onSectionSelect(hitData.id);
+          onSectionSelectRef.current(hitData.id);
         } else if (hitData.type === 'gate') {
-          onGateSelect(hitData.id);
+          onGateSelectRef.current(hitData.id);
         }
       }
     };
@@ -347,7 +353,6 @@ export default function Stadium3D({
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
       
-      const delta = clock.getDelta();
       const elapsed = clock.getElapsedTime();
       
       controls.update();
@@ -432,9 +437,8 @@ export default function Stadium3D({
     animate();
 
     const handleResize = () => {
-      if (!containerRef.current) return;
-      const w = containerRef.current.clientWidth;
-      const h = containerRef.current.clientHeight || 500;
+      const w = container.clientWidth;
+      const h = container.clientHeight || 500;
       
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
@@ -451,7 +455,6 @@ export default function Stadium3D({
       currentCanvas.removeEventListener('click', handleCanvasClick);
       currentCanvas.removeEventListener('mousemove', handleMouseMove);
       
-      const container = containerRef.current;
       if (container && container.contains(currentCanvas)) {
         container.removeChild(currentCanvas);
       }
@@ -600,7 +603,7 @@ export default function Stadium3D({
       
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + duration);
-    } catch (e) {}
+    } catch {}
   };
 
   return (

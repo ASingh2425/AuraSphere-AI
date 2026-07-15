@@ -4,7 +4,6 @@ import { simulateStreamingResponse } from '../utils/aiEngine';
 export default function OpsCopilot({ onCopilotAction }) {
   const [query, setQuery] = useState("");
   const [reasoningLogs, setReasoningLogs] = useState([]);
-  const [response, setResponse] = useState("");
   const [broadcastDraft, setBroadcastDraft] = useState("");
   const [actionItems, setActionItems] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -15,7 +14,6 @@ export default function OpsCopilot({ onCopilotAction }) {
     setIsProcessing(true);
     setQuery(cmdText);
     setReasoningLogs([]);
-    setResponse("");
     setBroadcastDraft("");
     setActionItems([]);
     
@@ -23,8 +21,6 @@ export default function OpsCopilot({ onCopilotAction }) {
       if (chunk.reasoning) {
         setReasoningLogs(chunk.reasoning);
       }
-      
-      setResponse(chunk.text);
 
       if (chunk.done) {
         setIsProcessing(false);
@@ -57,7 +53,7 @@ export default function OpsCopilot({ onCopilotAction }) {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.6);
-    } catch(e){}
+    } catch {}
 
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();

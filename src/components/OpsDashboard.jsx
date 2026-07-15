@@ -6,7 +6,6 @@ export default function OpsDashboard({
   setSelectedSection,
   selectedGate, 
   setSelectedGate,
-  setViewMode,
   setPathfinderRoute
 }) {
   const [attendance, setAttendance] = useState(12430);

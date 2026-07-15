@@ -1,7 +1,7 @@
 // AuraSphere AI - GenAI Simulation & Real Gemini API Engine
 // Supports local fallback parsing AND live Google Gemini 1.5 API calls with structured JSON output
 
-import { STADIUM_SECTIONS, GATES } from './mockData';
+import { STADIUM_SECTIONS } from './mockData';
 
 const KNOWLEDGE_BASE = {
   accessibility: `
@@ -57,10 +57,10 @@ export function processLocalFanQuery(query, language = 'en') {
   } 
   else if (q.includes('gate') || q.includes('entrance') || q.includes('puerta') || q.includes('entrée')) {
     let matchedGate = null;
-    if (q.includes('a')) matchedGate = 'A';
-    else if (q.includes('b')) matchedGate = 'B';
-    else if (q.includes('c')) matchedGate = 'C';
-    else if (q.includes('d')) matchedGate = 'D';
+    if (/\ba\b/.test(q)) matchedGate = 'A';
+    else if (/\bb\b/.test(q)) matchedGate = 'B';
+    else if (/\bc\b/.test(q)) matchedGate = 'C';
+    else if (/\bd\b/.test(q)) matchedGate = 'D';
 
     if (matchedGate) {
       responseText = `Gate ${matchedGate} is currently loading queue wait times. I've centered the 3D view on Gate ${matchedGate}.`;
@@ -108,7 +108,7 @@ export function processLocalOpsQuery(query) {
   reasoning.push("Initializing local query parser...");
   reasoning.push(`Identified intent: Operational Simulation. Command: "${query}"`);
 
-  if (q.includes('gate b') || q.includes('gate b congestion') || q.includes('congestion')) {
+  if (q.includes('gate b') || q.includes('congestion') || q.includes('traffic')) {
     reasoning.push("Accessing local sensors...");
     reasoning.push("Gate B queue length = 28 minutes. 15% validation scan failure rate detected.");
     responseText = "CRITICAL METRIC EXCEEDED: Gate B wait times have reached 28 minutes. Initiating manual scanner deployment...";

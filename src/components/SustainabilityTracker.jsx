@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { SUSTAINABILITY_BADGES } from '../utils/mockData';
 
 export default function SustainabilityTracker({ carbonPoints, onAddPoints }) {
   const [loggedActions, setLoggedActions] = useState([]);
@@ -40,7 +39,7 @@ export default function SustainabilityTracker({ carbonPoints, onAddPoints }) {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.3);
-    } catch(e){}
+    } catch {}
   };
 
   return (

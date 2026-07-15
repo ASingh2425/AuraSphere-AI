@@ -30,7 +30,7 @@ export default function App() {
   const [incidents, setIncidents] = useState(() => {
     const saved = localStorage.getItem('aurasphere_incidents');
     if (saved) {
-      try { return JSON.parse(saved); } catch(e) {}
+      try { return JSON.parse(saved); } catch {}
     }
     return MOCK_INCIDENTS;
   });
@@ -92,7 +92,7 @@ export default function App() {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.15);
-    } catch(e){}
+    } catch {}
   };
 
   const handleTabChange = (tabName) => {
