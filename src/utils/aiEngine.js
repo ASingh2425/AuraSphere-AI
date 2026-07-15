@@ -25,7 +25,7 @@ const KNOWLEDGE_BASE = {
   `
 };
 
-let geminiApiKey = localStorage.getItem('aurasphere_gemini_key') || "";
+let geminiApiKey = typeof localStorage !== 'undefined' ? (localStorage.getItem('aurasphere_gemini_key') || "") : "";
 
 export function getGeminiKey() {
   return geminiApiKey;
@@ -33,7 +33,9 @@ export function getGeminiKey() {
 
 export function setGeminiKey(key) {
   geminiApiKey = key;
-  localStorage.setItem('aurasphere_gemini_key', key);
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('aurasphere_gemini_key', key);
+  }
 }
 
 // LOCAL FALLBACK MATCHER

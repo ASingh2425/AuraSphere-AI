@@ -24,7 +24,7 @@ export default function App() {
   // LocalStorage state persistence
   const [carbonPoints, setCarbonPoints] = useState(() => {
     const pts = localStorage.getItem('aurasphere_carbon_points');
-    return pts ? parseInt(pts) : 10; // Start with paperless ticket reward
+    return pts ? parseInt(pts) : 10;
   });
 
   const [incidents, setIncidents] = useState(() => {
@@ -67,13 +67,11 @@ export default function App() {
           clearInterval(timer);
           return 100;
         }
-        
         const idx = Math.floor((prev / 100) * statuses.length);
         setBootStatus(statuses[Math.min(idx, statuses.length - 1)]);
-        
         return prev + 2;
       });
-    }, 30);
+    }, 20);
 
     return () => clearInterval(timer);
   }, []);
@@ -180,7 +178,7 @@ export default function App() {
 
   if (bootPercent < 100) {
     return (
-      <div className="boot-screen">
+      <div className="boot-screen" role="progressbar" aria-valuenow={bootPercent} aria-valuemin="0" aria-valuemax="100">
         <div style={{ textAlign: 'center', zIndex: 10 }}>
           <h1 className="neon-text-blue glitched-effect" style={{ fontSize: '32px', marginBottom: '8px', letterSpacing: '4px' }}>
             AURASPHERE AI
@@ -207,7 +205,7 @@ export default function App() {
       <div className="scanlines" />
 
       {/* HEADER SECTION */}
-      <header className="glass-panel" style={{
+      <header className="glass-panel" role="banner" style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -229,10 +227,11 @@ export default function App() {
         </div>
 
         {/* Tab Selector */}
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <nav style={{ display: 'flex', gap: '8px' }} aria-label="Main tab navigation">
           <button 
             onClick={() => handleTabChange("fan")}
             className={`futuristic-btn ${activeTab === 'fan' ? 'green' : ''}`}
+            aria-label="Toggle to Fan Portal Hub view"
             style={{ fontSize: '11px' }}
           >
             FAN PORTAL HUB
@@ -240,22 +239,25 @@ export default function App() {
           <button 
             onClick={() => handleTabChange("ops")}
             className={`futuristic-btn ${activeTab === 'ops' ? 'green' : ''}`}
+            aria-label="Toggle to Operations Command Center view"
             style={{ fontSize: '11px', borderColor: activeTab === 'ops' ? 'var(--neon-blue)' : 'rgba(0, 240, 255, 0.4)' }}
           >
             COMMAND CENTER
           </button>
-        </div>
+        </nav>
 
         {/* Gemini Key Config Overlay */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-mono)' }}>
+          <label htmlFor="gemini-api-key-input" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-mono)' }}>
             GEMINI API KEY:
-          </span>
+          </label>
           <input 
+            id="gemini-api-key-input"
             type="password" 
             value={geminiKeyInput}
             onChange={handleKeyInputChange}
             placeholder="paste AI key (optional)"
+            aria-label="Google Gemini API Key Config Input"
             style={{
               background: 'rgba(5, 8, 20, 0.9)',
               border: '1px solid var(--border-color)',
@@ -274,6 +276,7 @@ export default function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button
             onClick={() => setAudioEnabled(!audioEnabled)}
+            aria-label={audioEnabled ? "Mute audio system alerts" : "Unmute audio system alerts"}
             style={{
               background: 'none',
               border: 'none',
@@ -294,10 +297,10 @@ export default function App() {
       </header>
 
       {/* MAIN VIEWPORT LAYOUT */}
-      <main style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '16px', flex: 1, minHeight: 0 }}>
+      <main style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '16px', flex: 1, minHeight: 0 }} role="main">
         
         {/* Left Column: 3D Holographic Stadium Map Container */}
-        <section className="glass-panel" style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+        <section className="glass-panel" style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }} aria-label="3D Arena Viewport">
           <div style={{
             padding: '8px 16px',
             borderBottom: '1px solid var(--border-color)',
@@ -314,6 +317,7 @@ export default function App() {
             <div style={{ display: 'flex', gap: '6px' }}>
               <button 
                 onClick={() => setViewMode("default")} 
+                aria-label="Switch 3D map to standard tactical view"
                 style={{
                   background: viewMode === 'default' ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255,255,255,0.02)',
                   color: viewMode === 'default' ? 'var(--neon-blue)' : 'rgba(255,255,255,0.6)',
@@ -329,6 +333,7 @@ export default function App() {
               </button>
               <button 
                 onClick={() => setViewMode("heatmap")} 
+                aria-label="Switch 3D map to crowd density heatmap"
                 style={{
                   background: viewMode === 'heatmap' ? 'rgba(255, 204, 0, 0.15)' : 'rgba(255,255,255,0.02)',
                   color: viewMode === 'heatmap' ? 'var(--neon-amber)' : 'rgba(255,255,255,0.6)',
@@ -344,6 +349,7 @@ export default function App() {
               </button>
               <button 
                 onClick={() => setViewMode("accessibility")} 
+                aria-label="Switch 3D map to accessibility zones display"
                 style={{
                   background: viewMode === 'accessibility' ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255,255,255,0.02)',
                   color: viewMode === 'accessibility' ? 'var(--neon-green)' : 'rgba(255,255,255,0.6)',
@@ -381,6 +387,7 @@ export default function App() {
             <button 
               onClick={() => setPathfinderRoute(null)}
               className="futuristic-btn"
+              aria-label="Clear active wayfinding routes"
               style={{
                 position: 'absolute',
                 bottom: '16px',
@@ -397,7 +404,7 @@ export default function App() {
         </section>
 
         {/* Right Column: Interaction Sidebar */}
-        <section style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', minHeight: 0 }}>
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', minHeight: 0 }} aria-label="Control and Configuration Panels">
           
           {activeTab === 'fan' ? (
             <div style={{ display: 'grid', gridTemplateRows: '3fr 2fr', gap: '16px', height: '100%', minHeight: 0 }}>
@@ -421,9 +428,12 @@ export default function App() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', minHeight: 0 }}>
               
               {/* Command Sub Tabs */}
-              <div className="glass-panel" style={{ display: 'flex', padding: '6px', background: 'rgba(5, 8, 20, 0.4)' }}>
+              <div className="glass-panel" style={{ display: 'flex', padding: '6px', background: 'rgba(5, 8, 20, 0.4)' }} role="tablist" aria-label="Operations sub navigation panel">
                 <button
                   onClick={() => handleSubTabChange("dashboard")}
+                  role="tab"
+                  aria-selected={activeSubTab === 'dashboard'}
+                  aria-label="Toggle Live Telemetry Metrics Tab"
                   style={{
                     flex: 1,
                     background: activeSubTab === 'dashboard' ? 'rgba(0, 240, 255, 0.1)' : 'none',
@@ -441,6 +451,9 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => handleSubTabChange("copilot")}
+                  role="tab"
+                  aria-selected={activeSubTab === 'copilot'}
+                  aria-label="Toggle Operations AI Copilot Console Tab"
                   style={{
                     flex: 1,
                     background: activeSubTab === 'copilot' ? 'rgba(0, 240, 255, 0.1)' : 'none',
@@ -458,6 +471,9 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => handleSubTabChange("incidents")}
+                  role="tab"
+                  aria-selected={activeSubTab === 'incidents'}
+                  aria-label="Toggle Active Dispatches Incident Board Tab"
                   style={{
                     flex: 1,
                     background: activeSubTab === 'incidents' ? 'rgba(0, 240, 255, 0.1)' : 'none',
@@ -497,7 +513,6 @@ export default function App() {
                     incidents={incidents}
                     setIncidents={setIncidents}
                     onIncidentUpdate={(msg) => {
-                      // Append dispatches automatically to dashboard console logs in a clean way
                       console.log(`[DISPATCH] ${msg}`);
                     }}
                     onFocusMapCoordinate={handleMapAction}

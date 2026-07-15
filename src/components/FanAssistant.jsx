@@ -44,7 +44,6 @@ export default function FanAssistant({ onMapAction, onAddCarbonPoints }) {
   const handleSendMessage = (textToSend) => {
     if (!textToSend.trim()) return;
 
-    // Add user message
     const userMsg = {
       sender: 'user',
       text: textToSend,
@@ -54,7 +53,6 @@ export default function FanAssistant({ onMapAction, onAddCarbonPoints }) {
     setInputText("");
     setIsTyping(true);
 
-    // Call simulated GenAI response streaming
     simulateStreamingResponse(textToSend, 'fan', (chunk) => {
       if (chunk.done) {
         setIsTyping(false);
@@ -67,12 +65,10 @@ export default function FanAssistant({ onMapAction, onAddCarbonPoints }) {
           }
         ]);
         
-        // Execute map action if returned
         if (chunk.action) {
           onMapAction(chunk.action);
         }
 
-        // Gamified check: if user asked about sustainability, reward them!
         if (textToSend.toLowerCase().includes('carbon') || textToSend.toLowerCase().includes('points') || textToSend.toLowerCase().includes('recycle') || textToSend.toLowerCase().includes('eco')) {
           onAddCarbonPoints(15);
         }
@@ -81,7 +77,7 @@ export default function FanAssistant({ onMapAction, onAddCarbonPoints }) {
   };
 
   return (
-    <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
+    <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }} role="region" aria-label="AuraSphere Chat Companion">
       {/* Header */}
       <div style={{
         padding: '12px 16px',
@@ -96,10 +92,11 @@ export default function FanAssistant({ onMapAction, onAddCarbonPoints }) {
           <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 'bold', color: 'var(--neon-blue)' }}>AURASPHERE COMPANION</span>
         </div>
 
-        {/* Language selector */}
+        {/* Language selector dropdown */}
         <select 
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
+          aria-label="Select Chat Language"
           style={{
             background: '#0a1024',
             color: 'var(--neon-blue)',
@@ -127,7 +124,7 @@ export default function FanAssistant({ onMapAction, onAddCarbonPoints }) {
         gap: '12px',
         fontSize: '13px',
         maxHeight: '320px'
-      }}>
+      }} aria-live="polite">
         {messages.map((msg, idx) => (
           <div 
             key={idx} 
@@ -187,6 +184,7 @@ export default function FanAssistant({ onMapAction, onAddCarbonPoints }) {
           <button
             key={idx}
             onClick={() => handleSendMessage(pq.query)}
+            aria-label={`Ask query: ${pq.text}`}
             style={{
               background: 'rgba(255, 255, 255, 0.02)',
               border: '1px solid rgba(0, 240, 255, 0.1)',
@@ -226,6 +224,7 @@ export default function FanAssistant({ onMapAction, onAddCarbonPoints }) {
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(inputText); }}
           placeholder="Ask AuraSphere about navigation, gates, food..."
+          aria-label="AuraSphere chat query input box"
           style={{
             flex: 1,
             background: 'rgba(5, 8, 20, 0.6)',
@@ -241,6 +240,7 @@ export default function FanAssistant({ onMapAction, onAddCarbonPoints }) {
         <button 
           onClick={() => handleSendMessage(inputText)}
           className="futuristic-btn"
+          aria-label="Submit message to assistant"
           style={{ padding: '10px 20px', fontSize: '12px' }}
         >
           SEND

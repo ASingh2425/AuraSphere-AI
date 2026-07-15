@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STADIUM_SECTIONS, GATES } from '../utils/mockData';
@@ -16,8 +16,12 @@ export default function Stadium3D({
   pathfinderRoute // { from, to }
 }) {
   const containerRef = useRef(null);
-  const tooltipRef = useRef(null);
   
+  // React State for tooltip to prevent XSS-prone innerHTML DOM manipulations
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const hoveredItemRef = useRef(null); // Ref sync to avoid stale closures in mousemove
+
   const rendererRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -75,7 +79,6 @@ export default function Stadium3D({
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Capture DOM element locally to ensure clean cleanup references
     const currentCanvas = renderer.domElement;
 
     const controls = new OrbitControls(camera, currentCanvas);
@@ -315,35 +318,21 @@ export default function Stadium3D({
 
       if (hitData) {
         currentCanvas.style.cursor = 'pointer';
-        
-        if (tooltipRef.current) {
-          const tooltip = tooltipRef.current;
-          tooltip.style.display = 'block';
-          tooltip.style.left = `${event.clientX - rect.left + 15}px`;
-          tooltip.style.top = `${event.clientY - rect.top + 15}px`;
+        setTooltipPos({
+          x: event.clientX - rect.left + 15,
+          y: event.clientY - rect.top + 15
+        });
 
-          if (hitData.type === 'stand') {
-            const sec = STADIUM_SECTIONS[hitData.id];
-            tooltip.innerHTML = `
-              <div style="font-weight:bold; color:var(--neon-blue); margin-bottom:2px;">${sec.name}</div>
-              <div>Capacity Occupancy: ${Math.round(sec.occupancy * 100)}%</div>
-              <div>Restroom Queue: ${sec.queueRestroom} mins</div>
-              <div>Concession Queue: ${sec.queueConcession} mins</div>
-            `;
-          } else if (hitData.type === 'gate') {
-            const gate = GATES[hitData.id];
-            tooltip.innerHTML = `
-              <div style="font-weight:bold; color:var(--neon-green); margin-bottom:2px;">${gate.name}</div>
-              <div>Queue Wait Time: ${gate.waitTime} mins</div>
-              <div>Flow Rate: ${gate.flowRate} fans/min</div>
-              <div>Security Level: ${gate.status}</div>
-            `;
-          }
+        // Trigger React state only when hovered target changes to maximize framerate
+        if (!hoveredItemRef.current || hoveredItemRef.current.id !== hitData.id || hoveredItemRef.current.type !== hitData.type) {
+          hoveredItemRef.current = hitData;
+          setHoveredItem(hitData);
         }
       } else {
         currentCanvas.style.cursor = 'default';
-        if (tooltipRef.current) {
-          tooltipRef.current.style.display = 'none';
+        if (hoveredItemRef.current !== null) {
+          hoveredItemRef.current = null;
+          setHoveredItem(null);
         }
       }
     };
@@ -615,31 +604,54 @@ export default function Stadium3D({
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '380px' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '380px' }} role="img" aria-label="3D Holographic Stadium Map Visualizer">
       <div 
         ref={containerRef} 
         style={{ width: '100%', height: '100%', borderRadius: '8px', overflow: 'hidden' }} 
       />
       
-      {/* Floating Hover Tooltip */}
-      <div 
-        ref={tooltipRef}
-        className="telemetry"
-        style={{
-          position: 'absolute',
-          display: 'none',
-          pointerEvents: 'none',
-          backgroundColor: 'rgba(5, 10, 25, 0.95)',
-          border: '1px solid var(--neon-blue)',
-          padding: '8px 12px',
-          borderRadius: '4px',
-          fontSize: '11px',
-          zIndex: 1000,
-          boxShadow: 'var(--glow-blue)',
-          lineHeight: '1.4',
-          color: '#fff'
-        }}
-      />
+      {/* Floating Hover Tooltip - Renders safely as React nodes, resolving XSS issues */}
+      {hoveredItem && (
+        <div 
+          className="telemetry"
+          role="tooltip"
+          style={{
+            position: 'absolute',
+            left: `${tooltipPos.x}px`,
+            top: `${tooltipPos.y}px`,
+            pointerEvents: 'none',
+            backgroundColor: 'rgba(5, 10, 25, 0.95)',
+            border: '1px solid var(--neon-blue)',
+            padding: '8px 12px',
+            borderRadius: '4px',
+            fontSize: '11px',
+            zIndex: 1000,
+            boxShadow: 'var(--glow-blue)',
+            lineHeight: '1.4',
+            color: '#fff'
+          }}
+        >
+          {hoveredItem.type === 'stand' ? (
+            <>
+              <div style={{ fontWeight: 'bold', color: 'var(--neon-blue)', marginBottom: '2px' }}>
+                {STADIUM_SECTIONS[hoveredItem.id].name}
+              </div>
+              <div>Capacity Occupancy: {Math.round(STADIUM_SECTIONS[hoveredItem.id].occupancy * 100)}%</div>
+              <div>Restroom Queue: {STADIUM_SECTIONS[hoveredItem.id].queueRestroom} mins</div>
+              <div>Concession Queue: {STADIUM_SECTIONS[hoveredItem.id].queueConcession} mins</div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontWeight: 'bold', color: 'var(--neon-green)', marginBottom: '2px' }}>
+                {GATES[hoveredItem.id].name}
+              </div>
+              <div>Queue Wait Time: {GATES[hoveredItem.id].waitTime} mins</div>
+              <div>Flow Rate: {GATES[hoveredItem.id].flowRate} fans/min</div>
+              <div>Security Level: {GATES[hoveredItem.id].status}</div>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="telemetry" style={{
         position: 'absolute',
