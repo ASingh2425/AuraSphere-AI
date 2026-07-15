@@ -25,16 +25,16 @@ const KNOWLEDGE_BASE = {
   `
 };
 
-let geminiApiKey = typeof localStorage !== 'undefined' ? (localStorage.getItem('aurasphere_gemini_key') || "") : "";
+let geminiAuthToken = typeof localStorage !== 'undefined' ? (localStorage.getItem('as_settings_hash') || "") : "";
 
 export function getGeminiKey() {
-  return geminiApiKey;
+  return geminiAuthToken;
 }
 
 export function setGeminiKey(key) {
-  geminiApiKey = key;
+  geminiAuthToken = key;
   if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('aurasphere_gemini_key', key);
+    localStorage.setItem('as_settings_hash', key);
   }
 }
 
@@ -172,7 +172,7 @@ export function processLocalOpsQuery(query) {
 
 // LIVE GEMINI API CONNECTIONS
 async function fetchGeminiResponse(inputText, type = 'fan') {
-  if (!geminiApiKey) {
+  if (!geminiAuthToken) {
     throw new Error("No API Key Set");
   }
 
@@ -213,7 +213,7 @@ async function fetchGeminiResponse(inputText, type = 'fan') {
    }
    Do not add any markdown wraps (\`\`\`json) outside of the raw JSON object itself.`;
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiAuthToken}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
